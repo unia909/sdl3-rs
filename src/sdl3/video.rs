@@ -1148,7 +1148,6 @@ impl WindowBuilder {
 
         let raw_width = self.width as c_int;
         let raw_height = self.height as c_int;
-        println!("raw_width: {}, raw_height: {}", raw_width, raw_height);
         unsafe {
             // use SDL_CreateWindowWithPosition if x and y are not undefined
             // otherwise use SDL_CreateWindow

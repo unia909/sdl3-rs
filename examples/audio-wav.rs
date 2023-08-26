@@ -1,6 +1,6 @@
-extern crate sdl2;
+extern crate sdl3;
 
-use sdl2::audio::{AudioCVT, AudioCallback, AudioSpecDesired, AudioSpecWAV};
+use sdl3::audio::{AudioCVT, AudioCallback, AudioSpecDesired, AudioSpecWAV};
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -43,7 +43,7 @@ fn main() -> Result<(), String> {
         None => Cow::from(Path::new("./assets/sine.wav")),
         Some(s) => Cow::from(PathBuf::from(s)),
     };
-    let sdl_context = sdl2::init()?;
+    let sdl_context = sdl3::init()?;
     let audio_subsystem = sdl_context.audio()?;
 
     let desired_spec = AudioSpecDesired {

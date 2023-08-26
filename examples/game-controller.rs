@@ -5,7 +5,7 @@ fn main() -> Result<(), String> {
     // video subsystem enabled:
     sdl3::hint::set("SDL_JOYSTICK_THREAD", "1");
 
-    let sdl_context = sdl2::init()?;
+    let sdl_context = sdl3::init()?;
     let game_controller_subsystem = sdl_context.game_controller()?;
 
     let available = game_controller_subsystem

@@ -177,8 +177,27 @@ impl<'a> Surface<'a> {
         pitch: u32,
         format: pixels::PixelFormatEnum,
     ) -> Result<Surface<'a>, String> {
-        let masks = format.into_masks()?;
-        Surface::from_data_pixelmasks(data, width, height, pitch, &masks)
+        unsafe {
+            if width >= (1 << 31) || height >= (1 << 31) {
+                Err("Image is too large.".to_owned())
+            } else if pitch >= (1 << 31) {
+                Err("Pitch is too large.".to_owned())
+            } else {
+                let raw = sys::SDL_CreateSurfaceFrom(
+                    data.as_mut_ptr() as *mut _,
+                    width as c_int,
+                    height as c_int,
+                    pitch as c_int,
+                    format as u32,
+                );
+
+                if raw.is_null() {
+                    Err(get_error())
+                } else {
+                    Ok(Surface::from_ll(raw))
+                }
+            }
+        }
     }
 
     /// Creates a new surface from an existing buffer, using pixel masks.
@@ -191,31 +210,13 @@ impl<'a> Surface<'a> {
         masks: &pixels::PixelMasks,
     ) -> Result<Surface<'a>, String> {
         unsafe {
-            if width >= (1 << 31) || height >= (1 << 31) {
-                Err("Image is too large.".to_owned())
-            } else if pitch >= (1 << 31) {
-                Err("Pitch is too large.".to_owned())
-            } else {
-                let raw = sys::SDL_CreateSurfaceFrom(
-                    data.as_mut_ptr() as *mut _,
-                    width as c_int,
-                    height as c_int,
-                    pitch as c_int,
-                    sys::SDL_GetPixelFormatEnumForMasks(
-                        masks.bpp as c_int,
-                        masks.rmask,
-                        masks.gmask,
-                        masks.bmask,
-                        masks.amask,
-                    ),
-                );
-
-                if raw.is_null() {
-                    Err(get_error())
-                } else {
-                    Ok(Surface::from_ll(raw))
-                }
-            }
+            Surface::from_data(data, width, height, pitch, core::mem::transmute::<u32, pixels::PixelFormatEnum>(sys::SDL_GetPixelFormatEnumForMasks(
+                masks.bpp as c_int,
+                masks.rmask,
+                masks.gmask,
+                masks.bmask,
+                masks.amask,
+            )))
         }
     }
 
